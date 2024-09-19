@@ -14,38 +14,110 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Icon,
+  List,
+  ListItem,
+} from "@mui/material";
+import { Delete, Edit, EditCalendar, ViewAgenda } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { deleteBlog } from "../../features/blog/blogSlice";
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: "rotate(0deg)",
-      },
-    },
-    {
-      props: ({ expand }) => !!expand,
-      style: {
-        transform: "rotate(180deg)",
-      },
-    },
-  ],
-}));
+function SimpleDialog(props) {
+  const { onClose, open, blogId } = props;
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [openConfirm, setOpenConfirm] = React.useState(false); // State for delete confirmation dialog
 
-export default function BlogCard({ blog }) {
-  const [expanded, setExpanded] = React.useState(false);
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
+  const handleEditClick = () => {
+    navigate(`/edit/${blogId}`);
   };
 
+  const handleDeleteClick = () => {
+    setOpenConfirm(true); // Open the confirmation dialog
+  };
+
+  const handleConfirmClose = () => {
+    setOpenConfirm(false); // Close the confirmation dialog
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await dispatch(deleteBlog(blogId)); // Dispatch the delete action with blog ID
+      handleConfirmClose(); // Close the confirmation dialog after delete
+      onClose(); // Close the main dialog after deletion
+    } catch (error) {
+      console.error("Failed to delete the blog:", error);
+    }
+  };
+
+  return (
+    <>
+      <Dialog onClose={onClose} open={open}>
+        <List>
+          <ListItem>
+            <Button
+              onClick={() => navigate(`/view/${blogId}`)}
+              startIcon={<ViewAgenda />}
+            >
+              View
+            </Button>
+          </ListItem>
+          <ListItem>
+            <Button onClick={handleEditClick} startIcon={<Edit />}>
+              Edit
+            </Button>
+          </ListItem>
+          <ListItem>
+            <Button
+              onClick={handleDeleteClick}
+              startIcon={<Delete />}
+              color="error"
+            >
+              Delete
+            </Button>
+          </ListItem>
+        </List>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={openConfirm}
+        onClose={handleConfirmClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Are you sure you want to delete this blog?"}
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={handleConfirmClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            Yes, Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+
+export default function BlogCard({ blog }) {
+  //   console.log(blog);
+  const [showDialog, setShowDialog] = React.useState(false);
+  const handleOpen = () => {
+    setShowDialog(true);
+  };
+  const handleClose = () => {
+    setShowDialog(false);
+  };
   return (
     <Card sx={{ maxWidth: 345 }}>
       <CardHeader
@@ -55,12 +127,11 @@ export default function BlogCard({ blog }) {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings">
+          <IconButton aria-label="settings" onClick={handleOpen}>
             <MoreVertIcon />
           </IconButton>
         }
         title={blog?.author}
-        subheader="September 14, 2016"
       />
       <CardMedia
         component="img"
@@ -72,10 +143,12 @@ export default function BlogCard({ blog }) {
         <Typography variant="h6" sx={{ color: "text.primary" }}>
           {blog?.title}
         </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {blog?.desc}
-        </Typography>
+        <Box
+          sx={{ color: "text.secondary", mt: 1 }}
+          dangerouslySetInnerHTML={{ __html: blog?.desc }}
+        />
       </CardContent>
+      <SimpleDialog open={showDialog} onClose={handleClose} blogId={blog?.id} />
     </Card>
   );
 }

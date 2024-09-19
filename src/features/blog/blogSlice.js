@@ -69,7 +69,7 @@ const blogSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchBlogs.pending, (state) => {
-        state.loading = true;
+        state.loading = false;
       })
       .addCase(fetchBlogs.fulfilled, (state, { payload }) => {
         state.loading = false;

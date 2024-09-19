@@ -16,22 +16,19 @@ const BlogList = () => {
   if (error) return <Typography color="error">Error: {error}</Typography>;
   console.log(blogs);
   return (
-    <Grid container sx={{ mt: "50px" }} rowGap={10}>
-      {
-        blogs.map((blog) => (
-      <Grid
-        item
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"center"}
-        xs={12}
-        md={6}
-      >
-        <BlogCard blog={blog} />
-      </Grid>
-        ))
-
-      }
+    <Grid container sx={{ mt: "50px" }} rowGap={5}>
+      {blogs.map((blog) => (
+        <Grid
+          item
+          display={"flex"}
+          alignItems={"center"}
+          justifyContent={"center"}
+          xs={12}
+          md={6}
+        >
+          <BlogCard blog={blog} />
+        </Grid>
+      ))}
     </Grid>
   );
 };

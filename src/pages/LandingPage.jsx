@@ -13,8 +13,7 @@ const LandingPage = () => {
         mt: "20px",
       }}
     >
-      <Typography>Landing Page</Typography>
-      <Typography>Welcome {userInfo.email}</Typography>
+      <Typography variant="h5">Welcome: {userInfo.email}</Typography>
       <CreateBlogForm />
       <BlogList />
     </Box>
